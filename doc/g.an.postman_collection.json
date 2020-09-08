@@ -1,0 +1,283 @@
+{
+	"info": {
+		"_postman_id": "c83b3f7f-c11f-40c7-a56f-942ac7f45662",
+		"name": "g.an",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "createAnnouncement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "389233ad-93ba-430b-8d1a-f3fcd86b9cf7",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"if (jsonData.data) {",
+									"    postman.setEnvironmentVariable(\"announcementId\", jsonData.data.id);",
+									"} else {",
+									"    postman.setEnvironmentVariable(\"announcementId\", null);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"test2\",\n    \"content\": \"Hello, this is a serious announcement!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/admin/announcements",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"announcements"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAnnouncement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f3277180-b4ad-4e23-bb89-d5d833b85e66",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"if (jsonData.data) {",
+									"    postman.setEnvironmentVariable(\"announcementId\", jsonData.data.id);",
+									"} else {",
+									"    postman.setEnvironmentVariable(\"announcementId\", null);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"{{announcementId}}\",\n    \"title\": \"Updated title2\",\n    \"content\": \"This is an updated content.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/admin/announcements",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"announcements"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAnnouncement",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/admin/announcements/{{announcementId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"announcements",
+								"{{announcementId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "getAnnouncements",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6c682487-bede-44d7-967c-45092dd49868",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (jsonData.data && jsonData.data.length > 0) {",
+							"    postman.setEnvironmentVariable(\"announcementId\", jsonData.data[0].id);",
+							"} else {",
+							"    postman.setEnvironmentVariable(\"announcementId\", null);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/announcements?order=asc&orderBy=roflcopter",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"announcements"
+					],
+					"query": [
+						{
+							"key": "order",
+							"value": "asc"
+						},
+						{
+							"key": "orderBy",
+							"value": "roflcopter"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getAnnouncement ID",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/announcements/{{announcementId}}1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"announcements",
+						"{{announcementId}}1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getInfo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a2e72ca1-830d-4b1a-83e0-4f49f8b2e676",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (jsonData.data && jsonData.data.length > 0) {",
+							"    postman.setEnvironmentVariable(\"announcementId\", jsonData.data[0].id);",
+							"} else {",
+							"    postman.setEnvironmentVariable(\"announcementId\", null);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/info",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"info"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
