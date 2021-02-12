@@ -2,6 +2,8 @@
 
 g.an - A tiny announcement server with Go
 
+There's also a [g.an frontend](https://github.com/v4rakh/gan-frontend).
+
 ## Install
 
 1. Run `make dependencies` to fetch dependencies
