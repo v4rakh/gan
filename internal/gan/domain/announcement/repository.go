@@ -6,7 +6,8 @@ import (
 )
 
 type repository interface {
-	List(orderBy string, order string) ([]*Announcement, error)
+	Paginate(page int, pageSize int, orderBy string, order string) ([]*Announcement, error)
+	Count() (int64, error)
 	Find(id string) (*Announcement, error)
 	Create(title string, content string) (Announcement, error)
 	Update(id string, title string, content string) (*Announcement, error)
@@ -21,23 +22,6 @@ func NewRepo(db *gorm.DB) *sqliteRepo {
 	return &sqliteRepo{
 		db: db,
 	}
-}
-
-func (r *sqliteRepo) List(orderBy string, order string) ([]*Announcement, error) {
-	var e []*Announcement
-
-	var res *gorm.DB
-	if orderBy != "" && order != "" {
-		res = r.db.Order(orderBy + " " + order).Find(&e)
-	} else {
-		res = r.db.Find(&e)
-	}
-
-	if res.Error != nil {
-		return nil, res.Error
-	}
-
-	return e, nil
 }
 
 func (r *sqliteRepo) Find(id string) (*Announcement, error) {
@@ -108,4 +92,44 @@ func (r *sqliteRepo) Delete(id string) error {
 	}
 
 	return nil
+}
+
+func (r *sqliteRepo) Paginate(page int, pageSize int, orderBy string, order string) ([]*Announcement, error) {
+	var e []*Announcement
+
+	if page == 0 || pageSize <= 0 {
+		return nil, domain.ErrorPageGreaterZero
+	}
+
+	if pageSize <= 0 {
+		return nil, domain.ErrorPageSizeGreaterZero
+	}
+
+	offset := (page - 1) * pageSize
+
+	var res *gorm.DB
+	if orderBy != "" && order != "" {
+		res = r.db.Order(orderBy + " " + order).Offset(offset).Limit(pageSize).Find(&e)
+	} else {
+		res = r.db.Offset(offset).Limit(pageSize).Find(&e)
+	}
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return e, nil
+}
+
+func (r *sqliteRepo) Count() (int64, error) {
+	var c int64
+
+	var res *gorm.DB
+	res = r.db.Model(&Announcement{}).Count(&c)
+
+	if res.Error != nil {
+		return 0, res.Error
+	}
+
+	return c, nil
 }

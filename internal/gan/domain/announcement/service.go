@@ -10,10 +10,6 @@ func NewService(r repository) *Service {
 	}
 }
 
-func (s *Service) List(orderBy string, order string) ([]*Announcement, error) {
-	return s.repo.List(orderBy, order)
-}
-
 func (s *Service) Get(id string) (*Announcement, error) {
 	e, err := s.repo.Find(id)
 
@@ -46,4 +42,12 @@ func (s *Service) Delete(id string) error {
 	}
 
 	return s.repo.Delete(id)
+}
+
+func (s *Service) Paginate(page int, pageSize int, orderBy string, order string) ([]*Announcement, error) {
+	return s.repo.Paginate(page, pageSize, orderBy, order)
+}
+
+func (s *Service) Count() (int64, error) {
+	return s.repo.Count()
 }

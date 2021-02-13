@@ -14,7 +14,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "389233ad-93ba-430b-8d1a-f3fcd86b9cf7",
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);",
 									"",
@@ -75,7 +74,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "f3277180-b4ad-4e23-bb89-d5d833b85e66",
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);",
 									"",
@@ -165,8 +163,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "getAnnouncements",
@@ -174,7 +171,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "6c682487-bede-44d7-967c-45092dd49868",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"",
@@ -195,7 +191,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/api/announcements?order=asc&orderBy=roflcopter",
+					"raw": "{{url}}/api/announcements?pageSize=1&order=asc&orderBy=id",
 					"host": [
 						"{{url}}"
 					],
@@ -205,12 +201,16 @@
 					],
 					"query": [
 						{
+							"key": "pageSize",
+							"value": "1"
+						},
+						{
 							"key": "order",
 							"value": "asc"
 						},
 						{
 							"key": "orderBy",
-							"value": "roflcopter"
+							"value": "id"
 						}
 					]
 				}
@@ -226,14 +226,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/api/announcements/{{announcementId}}1",
+					"raw": "{{url}}/api/announcements/{{announcementId}}",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"api",
 						"announcements",
-						"{{announcementId}}1"
+						"{{announcementId}}"
 					]
 				}
 			},
@@ -245,7 +245,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "a2e72ca1-830d-4b1a-83e0-4f49f8b2e676",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"",
@@ -278,6 +277,5 @@
 			},
 			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

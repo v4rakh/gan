@@ -38,7 +38,7 @@ func StartServer() {
 
 	apiPublicGroup := router.Group("/api")
 	apiPublicGroup.GET("/info", infoHandler.ShowInfo)
-	apiPublicGroup.GET("/announcements", announcementHandler.ListAnnouncements)
+	apiPublicGroup.GET("/announcements", announcementHandler.PaginateAnnouncements)
 	apiPublicGroup.GET("/announcements/:id", announcementHandler.GetAnnouncement)
 
 	apiAdminGroup := router.Group("/api/admin", gin.BasicAuth(gin.Accounts{

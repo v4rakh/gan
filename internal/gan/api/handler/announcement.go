@@ -9,6 +9,7 @@ import (
 	"github.com/v4rakh/gan/internal/gan/domain/announcement"
 	"github.com/v4rakh/gan/internal/util"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -31,9 +32,22 @@ type updateAnnouncementRequest struct {
 	Content string `json:"content" binding:"required,min=1"`
 }
 
-func (h *AnnouncementHandler) ListAnnouncements(c *gin.Context) {
-	orderBy := util.ToSnakeCase(c.Query("sortBy"))
-	order := strings.ToLower(c.Query("sortOrder"))
+func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
+	orderBy := util.ToSnakeCase(c.Query("orderBy"))
+	order := strings.ToLower(c.Query("order"))
+	page, _ := strconv.Atoi(c.Query("page"))
+	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
+
+	if page == 0 {
+		page = 1
+	}
+
+	switch {
+	case pageSize > 100:
+		pageSize = 100
+	case pageSize <= 0:
+		pageSize = 1
+	}
 
 	if orderBy == "" || !util.FindInSlice([]string{"id", "created_at"}, orderBy) {
 		orderBy = "created_at"
@@ -43,11 +57,16 @@ func (h *AnnouncementHandler) ListAnnouncements(c *gin.Context) {
 		order = "desc"
 	}
 
-	announcements, err := h.service.List(orderBy, order)
+	announcements, err := h.service.Paginate(page, pageSize, orderBy, order)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
-		return
+		if err == domain.ErrorPageGreaterZero || err == domain.ErrorPageSizeGreaterZero {
+			c.AbortWithStatusJSON(http.StatusBadRequest, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorBadRequest, err.Error()))
+			return
+		} else {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
+			return
+		}
 	}
 
 	var data []*presenter.Announcement
@@ -62,7 +81,14 @@ func (h *AnnouncementHandler) ListAnnouncements(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, presenter.NewDataResponseWithPayload(data))
+	totalElements, err := h.service.Count()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
+		return
+	}
+
+	totalPages := (totalElements + int64(pageSize) - 1) / int64(pageSize)
+	c.JSON(http.StatusOK, presenter.NewDataResponseWithPayload(presenter.NewAnnouncementPage(data, page, pageSize, orderBy, order, totalElements, totalPages)))
 }
 
 func (h *AnnouncementHandler) GetAnnouncement(c *gin.Context) {
