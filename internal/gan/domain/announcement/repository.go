@@ -34,7 +34,7 @@ func (r *sqliteRepo) Find(id string) (*Announcement, error) {
 	}
 
 	if res.RowsAffected == 0 {
-		return nil, domain.ErrorAnnouncementNotFound
+		return nil, domain.ErrorNotFound
 	}
 
 	return &announcement, nil
@@ -55,7 +55,7 @@ func (r *sqliteRepo) Create(title string, content string) (Announcement, error) 
 	}
 
 	if res.RowsAffected == 0 {
-		return e, domain.ErrorAnnouncementCreateFailed
+		return e, domain.ErrorCreateFailed
 	}
 
 	return e, nil
@@ -74,7 +74,7 @@ func (r *sqliteRepo) Update(id string, title string, content string) (*Announcem
 	res := r.db.Save(&e)
 
 	if res.RowsAffected == 0 {
-		return e, domain.ErrorAnnouncementUpdateFailed
+		return e, domain.ErrorUpdateFailed
 	}
 
 	return e, nil
@@ -88,7 +88,7 @@ func (r *sqliteRepo) Delete(id string) error {
 	}
 
 	if res.RowsAffected == 0 {
-		return domain.ErrorAnnouncementDeleteFailed
+		return domain.ErrorDeleteFailed
 	}
 
 	return nil

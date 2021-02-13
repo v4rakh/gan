@@ -5,7 +5,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/v4rakh/gan/internal/gan/api"
 	"github.com/v4rakh/gan/internal/gan/api/presenter"
-	"github.com/v4rakh/gan/internal/gan/domain"
 	"github.com/v4rakh/gan/internal/gan/domain/announcement"
 	"github.com/v4rakh/gan/internal/util"
 	"net/http"
@@ -55,15 +54,9 @@ func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
 	}
 
 	announcements, err := h.service.Paginate(page+1, pageSize, orderBy, order)
-
 	if err != nil {
-		if err == domain.ErrorPageGreaterZero || err == domain.ErrorPageSizeGreaterZero {
-			c.AbortWithStatusJSON(http.StatusBadRequest, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorBadRequest, err.Error()))
-			return
-		} else {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
-			return
-		}
+		HandleAbortWhenError(c, err)
+		return
 	}
 
 	var data []*presenter.Announcement
@@ -80,7 +73,7 @@ func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
 
 	totalElements, err := h.service.Count()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
+		HandleAbortWhenError(c, err)
 		return
 	}
 
@@ -90,15 +83,9 @@ func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
 
 func (h *AnnouncementHandler) GetAnnouncement(c *gin.Context) {
 	e, err := h.service.Get(c.Param("id"))
-
 	if err != nil {
-		if err == domain.ErrorAnnouncementNotFound {
-			c.AbortWithStatusJSON(http.StatusNotFound, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorNotFound, err.Error()))
-			return
-		} else {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
-			return
-		}
+		HandleAbortWhenError(c, err)
+		return
 	}
 
 	data := &presenter.Announcement{
@@ -122,9 +109,8 @@ func (h *AnnouncementHandler) CreateAnnouncement(c *gin.Context) {
 	}
 
 	e, err := h.service.Create(req.Title, req.Content)
-
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
+		HandleAbortWhenError(c, err)
 		return
 	}
 
@@ -149,15 +135,9 @@ func (h *AnnouncementHandler) UpdateAnnouncement(c *gin.Context) {
 	}
 
 	e, err := h.service.Update(req.ID, req.Title, req.Content)
-
 	if err != nil {
-		if err == domain.ErrorAnnouncementNotFound {
-			c.AbortWithStatusJSON(http.StatusNotFound, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorNotFound, err.Error()))
-			return
-		} else {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
-			return
-		}
+		HandleAbortWhenError(c, err)
+		return
 	}
 
 	data := &presenter.Announcement{
@@ -172,16 +152,9 @@ func (h *AnnouncementHandler) UpdateAnnouncement(c *gin.Context) {
 
 func (h *AnnouncementHandler) DeleteAnnouncement(c *gin.Context) {
 	err := h.service.Delete(c.Param("id"))
-
 	if err != nil {
-		if err == domain.ErrorAnnouncementNotFound {
-			c.AbortWithStatusJSON(http.StatusNotFound, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorNotFound, err.Error()))
-			return
-		} else {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
-			return
-		}
+		HandleAbortWhenError(c, err)
+		return
 	}
-
 	c.JSON(http.StatusNoContent, nil)
 }

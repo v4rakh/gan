@@ -7,9 +7,11 @@ const (
 
 	// http
 	AppNameHeader    = "X-App-Name"
-	AppVersionHeader = "X-App-AppVersion"
+	AppVersionHeader = "X-App-Version"
 
 	// defaults
+	DomainDefault = "http://localhost"
+
 	ServerListenDefault = ""
 	ServerPortDefault   = "8080"
 	SqliteDbNameDefault = "gan.db"
@@ -18,7 +20,13 @@ const (
 	CorsAllowMethodsDefault = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 	CorsAllowHeadersDefault = "Authorization, Content-Type"
 
+	MailEnabledDefault    = "true"
+	MailAuthTypeDefault   = "PLAIN"
+	MailEncryptionDefault = "SSL"
+
 	// environment
+	EnvDomain = "DOMAIN"
+
 	EnvDbFile       = "DB_FILE"
 	EnvServerPort   = "SERVER_PORT"
 	EnvServerListen = "SERVER_LISTEN"
@@ -29,4 +37,13 @@ const (
 	EnvCorsAllowOrigin  = "CORS_ALLOW_ORIGIN"
 	EnvCorsAllowMethods = "CORS_ALLOW_METHODS"
 	EnvCorsAllowHeaders = "CORS_ALLOW_HEADERS"
+
+	EnvMailEnabled      = "MAIL_ENABLED"
+	EnvMailFrom         = "MAIL_FROM"
+	EnvMailHost         = "MAIL_HOST"
+	EnvMailPort         = "MAIL_PORT"
+	EnvMailEncryption   = "MAIL_ENCRYPTION"
+	EnvMailAuthUser     = "MAIL_AUTH_USER"
+	EnvMailAuthPassword = "MAIL_AUTH_PASSWORD"
+	EnvMailAuthType     = "MAIL_AUTH_TYPE"
 )
