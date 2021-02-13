@@ -42,11 +42,8 @@ func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
 		page = 0
 	}
 
-	switch {
-	case pageSize > 100:
-		pageSize = 100
-	case pageSize <= 0:
-		pageSize = 1
+	if pageSize <= 0 {
+		pageSize = 5
 	}
 
 	if orderBy == "" || !util.FindInSlice([]string{"id", "created_at", "title"}, orderBy) {
