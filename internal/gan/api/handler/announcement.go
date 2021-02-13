@@ -39,7 +39,7 @@ func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
 
 	if page == 0 {
-		page = 1
+		page = 0
 	}
 
 	switch {
@@ -49,7 +49,7 @@ func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
 		pageSize = 1
 	}
 
-	if orderBy == "" || !util.FindInSlice([]string{"id", "created_at"}, orderBy) {
+	if orderBy == "" || !util.FindInSlice([]string{"id", "created_at", "title"}, orderBy) {
 		orderBy = "created_at"
 	}
 
@@ -57,7 +57,7 @@ func (h *AnnouncementHandler) PaginateAnnouncements(c *gin.Context) {
 		order = "desc"
 	}
 
-	announcements, err := h.service.Paginate(page, pageSize, orderBy, order)
+	announcements, err := h.service.Paginate(page+1, pageSize, orderBy, order)
 
 	if err != nil {
 		if err == domain.ErrorPageGreaterZero || err == domain.ErrorPageSizeGreaterZero {
