@@ -77,6 +77,7 @@ func (h *SubscriptionHandler) PaginateSubscriptions(c *gin.Context) {
 		data = append(data, &presenter.Subscription{
 			Address:   e.Address,
 			Token:     e.Token,
+			State:     e.State,
 			CreatedAt: e.CreatedAt,
 			UpdatedAt: e.UpdatedAt,
 		})
