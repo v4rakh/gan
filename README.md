@@ -2,10 +2,12 @@
 
 g.an - A tiny announcement server with Go.
 
+Use for your small blog or as news distribution application.
+
 Features:
 
-* Manage announcements which are simple entries containing a title and content
-* Let users manage subscription to announcements to get notified if there's a new announcement
+* Manage announcements which are simple text snippets containing a `title` and plain text `content`
+* Allow subscribing, so that users (via mail) get notified if there's a new announcement
 
 There's also a [g.an frontend](https://github.com/v4rakh/gan-frontend).
 
@@ -21,16 +23,16 @@ The following environment variables can be used to modify application behavior.
 
 | Variable | Purpose | Required | Default/Description |
 |:---|:---|:---|:---|
-| DOMAIN | The domain | required | `http://localhost` (full with protocol) |
+| DOMAIN | The domain | required | `http://localhost` (adapt and use full protocol, **no** trailing slash) |
 | ADMIN_USER | Admin user name for login | required |  |
 | ADMIN_PASSWORD | Admin password for login | required |  |
-| DB_FILE | Path to the SQLITE file | optional | `$XDG_DATA_DIR/gan/gan.db`, e.g. `~/.local/share/gan/gan.db` |
-| SERVER_PORT | Port | optional | 8080 |
-| SERVER_LISTEN | Server's listen address | optional | empty which equals 0.0.0.0 |
-| CORS_ALLOW_ORIGIN | CORS configuration | optional | * |
-| CORS_ALLOW_METHODS | CORS configuration | optional | GET, POST, PUT, PATCH, DELETE, OPTIONS |
-| CORS_ALLOW_HEADERS | CORS configuration | optional | Authorization, Content-Type |
-| GIN_MODE           | GIN mode, e.g. for debugging | optional | debug and release in docker |
+| DB_FILE | Path to the SQLITE file | optional | `<XDG_DATA_DIR>/gan/gan.db`, e.g. `~/.local/share/gan/gan.db` |
+| SERVER_PORT | Port | optional | `8080` |
+| SERVER_LISTEN | Server's listen address | optional | empty which equals `0.0.0.0` |
+| CORS_ALLOW_ORIGIN | CORS configuration | optional | `*` |
+| CORS_ALLOW_METHODS | CORS configuration | optional | `GET, POST, PUT, PATCH, DELETE, OPTIONS` |
+| CORS_ALLOW_HEADERS | CORS configuration | optional | `Authorization, Content-Type` |
+| GIN_MODE           | GIN mode, e.g. for debugging | optional | `debug` and `release` in docker |
 |MAIL_ENABLED|Mails enabled?|required|`true` [true,false], otherwise subscription mails won't work|
 |MAIL_FROM|From mail address|required if MAIL_ENABLED=true||
 |MAIL_HOST|SMTP Setting|required if MAIL_ENABLED=true||
@@ -38,7 +40,7 @@ The following environment variables can be used to modify application behavior.
 |MAIL_ENCRYPTION|SMTP Setting|required if MAIL_ENABLED=true|`SSL` [NONE, SSL, TLS]|
 |MAIL_AUTH_USER|SMTP Setting|required if MAIL_ENABLED=true||
 |MAIL_AUTH_PASSWORD|SMTP Setting|required if MAIL_ENABLED=true||
-|MAIL_AUTH_TYPE|SMTP Setting|optional|`PLAIN` [PLAIN,LOGIN,CRAM_MD5]|
+|MAIL_AUTH_TYPE|SMTP Setting|required if MAIL_ENABLED=true|`PLAIN` [PLAIN,LOGIN,CRAM_MD5]|
 
 ## Release & deployment
 
