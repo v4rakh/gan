@@ -1,12 +1,16 @@
 package announcement
 
+import "github.com/v4rakh/gan/internal/gan/domain/subscription"
+
 type Service struct {
-	repo repository
+	repo                repository
+	subscriptionService *subscription.Service
 }
 
-func NewService(r repository) *Service {
+func NewService(r repository, s *subscription.Service) *Service {
 	return &Service{
-		repo: r,
+		repo:                r,
+		subscriptionService: s,
 	}
 }
 
@@ -21,7 +25,13 @@ func (s *Service) Get(id string) (*Announcement, error) {
 }
 
 func (s *Service) Create(title string, content string) (Announcement, error) {
-	return s.repo.Create(title, content)
+	created, err := s.repo.Create(title, content)
+
+	if err == nil {
+		s.subscriptionService.NotifySubscribers(title)
+	}
+
+	return created, err
 }
 
 func (s *Service) Update(id string, title string, content string) (*Announcement, error) {

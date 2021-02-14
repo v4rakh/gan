@@ -3,6 +3,8 @@ package presenter
 const (
 	ErrorBadRequest = "BadRequest"
 	ErrorNotFound   = "NotFound"
+	ErrorForbidden  = "Forbidden"
+	ErrorConflict   = "Conflict"
 	ErrorGeneral    = "GeneralError"
 )
 

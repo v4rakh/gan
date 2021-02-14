@@ -4,6 +4,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/v4rakh/gan/internal/gan/constant"
 	"github.com/v4rakh/gan/internal/gan/domain/announcement"
+	"github.com/v4rakh/gan/internal/gan/domain/subscription"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
@@ -14,36 +15,9 @@ type env struct {
 	db *gorm.DB
 }
 
-func boostrapConfiguration() {
-	if os.Getenv(constant.EnvAdminUser) == "" {
-		log.Fatalf("Not all required ENV variables given. Please set %s\n", constant.EnvAdminUser)
-		return
-	}
+func configEnv() *env {
+	prepareEnv()
 
-	if os.Getenv(constant.EnvAdminPassword) == "" {
-		log.Fatalf("Not all required ENV variables given. Please set %s\n", constant.EnvAdminPassword)
-		return
-	}
-
-	setConfigurationDefaults(constant.EnvServerPort, constant.ServerPortDefault)
-	setConfigurationDefaults(constant.EnvServerListen, constant.ServerListenDefault)
-	setConfigurationDefaults(constant.EnvCorsAllowOrigin, constant.CorsAllowOriginDefault)
-	setConfigurationDefaults(constant.EnvCorsAllowMethods, constant.CorsAllowMethodsDefault)
-	setConfigurationDefaults(constant.EnvCorsAllowHeaders, constant.CorsAllowHeadersDefault)
-}
-
-func setConfigurationDefaults(key string, defaultValue string) {
-	var err error
-	if os.Getenv(key) == "" {
-		err = os.Setenv(key, defaultValue)
-
-		if err != nil {
-			log.Fatalf("Could not set default value for ENV variable '%s'", key)
-		}
-	}
-}
-
-func bootstrapDatabase() *env {
 	if os.Getenv(constant.EnvDbFile) == "" {
 		defaultDbFile, err := xdg.DataFile(constant.AppName + "/" + constant.SqliteDbNameDefault)
 
@@ -51,7 +25,7 @@ func bootstrapDatabase() *env {
 			log.Fatalf("Database file '%s' could not be created. Reason: %v", defaultDbFile, err)
 		}
 
-		setConfigurationDefaults(constant.EnvDbFile, defaultDbFile)
+		setEnvKeyDefault(constant.EnvDbFile, defaultDbFile)
 	}
 
 	dbFile := os.Getenv(constant.EnvDbFile)
@@ -64,9 +38,57 @@ func bootstrapDatabase() *env {
 
 	env := &env{db: db}
 	err = env.db.AutoMigrate(&announcement.Announcement{})
+	err = env.db.AutoMigrate(&subscription.Subscription{})
 	if err != nil {
 		log.Fatalf("Could not migrate database schema: %v\n", err)
 	}
 
 	return env
+}
+
+func prepareEnv() {
+	setEnvKeyDefault(constant.EnvDomain, constant.DomainDefault)
+	setEnvKeyDefault(constant.EnvServerPort, constant.ServerPortDefault)
+	setEnvKeyDefault(constant.EnvServerListen, constant.ServerListenDefault)
+	setEnvKeyDefault(constant.EnvCorsAllowOrigin, constant.CorsAllowOriginDefault)
+	setEnvKeyDefault(constant.EnvCorsAllowMethods, constant.CorsAllowMethodsDefault)
+	setEnvKeyDefault(constant.EnvCorsAllowHeaders, constant.CorsAllowHeadersDefault)
+	setEnvKeyDefault(constant.EnvMailEnabled, constant.MailEnabledDefault)
+
+	vars := []string{constant.EnvAdminUser, constant.EnvAdminPassword}
+
+	if os.Getenv(constant.EnvMailEnabled) == "true" {
+		setEnvKeyDefault(constant.EnvMailAuthType, constant.MailAuthTypeDefault)
+		setEnvKeyDefault(constant.EnvMailEncryption, constant.MailEncryptionDefault)
+
+		vars = append(vars,
+			constant.EnvMailFrom,
+			constant.EnvMailHost,
+			constant.EnvMailPort,
+			constant.EnvMailEncryption,
+			constant.EnvMailAuthUser,
+			constant.EnvMailAuthPassword,
+			constant.EnvMailAuthType)
+	}
+
+	for _, s := range vars {
+		failIfEnvKeyNotPresent(s)
+	}
+}
+
+func failIfEnvKeyNotPresent(key string) {
+	if os.Getenv(key) == "" {
+		log.Fatalf("Not all required ENV variables given. Please set '%s'\n", key)
+	}
+}
+
+func setEnvKeyDefault(key string, defaultValue string) {
+	var err error
+	if os.Getenv(key) == "" {
+		err = os.Setenv(key, defaultValue)
+
+		if err != nil {
+			log.Fatalf("Could not set default value for ENV variable '%s'", key)
+		}
+	}
 }
