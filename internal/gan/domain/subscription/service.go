@@ -7,6 +7,7 @@ import (
 	"github.com/v4rakh/gan/internal/gan/service/mail"
 	"github.com/v4rakh/gan/internal/util"
 	"log"
+	"net/url"
 	"os"
 )
 
@@ -46,13 +47,15 @@ func (s *Service) Rescue(address string) error {
 	switch State(e.State) {
 	case Pending:
 		s.mailService.Send(address, s.i18nService.Translate("mail_subscription_created_subject", nil), s.i18nService.Translate("mail_subscription_created_body", map[string]interface{}{
-			"Domain": os.Getenv(constant.EnvDomain),
-			"Token":  e.Token,
+			"Domain":  os.Getenv(constant.EnvDomain),
+			"Address": url.QueryEscape(address),
+			"Token":   url.QueryEscape(e.Token),
 		}))
 	case Active:
 		s.mailService.Send(address, s.i18nService.Translate("mail_subscription_verified_subject", nil), s.i18nService.Translate("mail_subscription_verified_body", map[string]interface{}{
-			"Domain": os.Getenv(constant.EnvDomain),
-			"Token":  e.Token,
+			"Domain":  os.Getenv(constant.EnvDomain),
+			"Address": url.QueryEscape(address),
+			"Token":   url.QueryEscape(e.Token),
 		}))
 	}
 
@@ -69,8 +72,9 @@ func (s *Service) Create(address string) error {
 	token := util.RandomString(randomTokenLength)
 	_, err = s.repo.Create(address, Pending, token)
 	s.mailService.Send(address, s.i18nService.Translate("mail_subscription_created_subject", nil), s.i18nService.Translate("mail_subscription_created_body", map[string]interface{}{
-		"Domain": os.Getenv(constant.EnvDomain),
-		"Token":  token,
+		"Domain":  os.Getenv(constant.EnvDomain),
+		"Address": url.QueryEscape(address),
+		"Token":   url.QueryEscape(token),
 	}))
 	return err
 }
@@ -95,8 +99,9 @@ func (s *Service) Verify(address string, token string) error {
 
 	if updated != nil {
 		s.mailService.Send(address, s.i18nService.Translate("mail_subscription_verified_subject", nil), s.i18nService.Translate("mail_subscription_verified_body", map[string]interface{}{
-			"Domain": os.Getenv(constant.EnvDomain),
-			"Token":  newToken,
+			"Domain":  os.Getenv(constant.EnvDomain),
+			"Address": url.QueryEscape(address),
+			"Token":   url.QueryEscape(newToken),
 		}))
 	}
 

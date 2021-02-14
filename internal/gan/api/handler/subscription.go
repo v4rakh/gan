@@ -21,25 +21,25 @@ func NewSubscriptionHandler(s *subscription.Service) *SubscriptionHandler {
 }
 
 type createSubscriptionRequest struct {
-	Address string `json:"address" binding:"required,min=3,max=255"`
+	Address string `json:"address" binding:"required,email,min=3,max=255"`
 }
 
 type rescueSubscriptionRequest struct {
-	Address string `json:"address" binding:"required,min=3,max=255"`
+	Address string `json:"address" binding:"required,email,min=3,max=255"`
 }
 
 type verifySubscriptionRequest struct {
-	Address string `json:"address" binding:"required,min=1"`
-	Token   string `json:"token" binding:"required,min=1"`
+	Address string `json:"address" binding:"required,email,min=3,max=255"`
+	Token   string `json:"token" binding:"required,min=1,max=255"`
 }
 
 type deleteSubscriptionRequest struct {
-	Address string `json:"address" binding:"required,min=1"`
-	Token   string `json:"token" binding:"required,min=1"`
+	Address string `json:"address" binding:"required,email,min=3,max=255"`
+	Token   string `json:"token" binding:"required,min=1,max=255"`
 }
 
 type deleteSubscriptionByAddressRequest struct {
-	Address string `json:"address" binding:"required,min=1"`
+	Address string `json:"address" binding:"required,min=3,max=255"`
 }
 
 func (h *SubscriptionHandler) PaginateSubscriptions(c *gin.Context) {

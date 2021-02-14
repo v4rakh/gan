@@ -11,14 +11,12 @@ import (
 
 type Service struct {
 	smtpServer *mail.SMTPServer
-	smtpClient *mail.SMTPClient
 }
 
 func NewService() *Service {
 	if os.Getenv(constant.EnvMailEnabled) == "false" {
 		return &Service{
 			smtpServer: nil,
-			smtpClient: nil,
 		}
 	}
 
@@ -49,18 +47,12 @@ func NewService() *Service {
 		server.Authentication = mail.AuthPlain
 	}
 
-	server.KeepAlive = true
+	server.KeepAlive = false
 	server.ConnectTimeout = 10 * time.Second
 	server.SendTimeout = 10 * time.Second
-	smtpClient, err := server.Connect()
-
-	if err != nil {
-		log.Fatalf("Could not connect to mail server '%s'. Reason: %s\n", server.Host, err.Error())
-	}
 
 	return &Service{
 		smtpServer: server,
-		smtpClient: smtpClient,
 	}
 }
 
@@ -72,7 +64,12 @@ func (s *Service) Send(address string, subject string, body string) {
 	email := mail.NewMSG()
 	email.SetFrom(os.Getenv(constant.EnvMailFrom)).AddTo(address).SetSubject(subject).SetBody(mail.TextPlain, body)
 
-	err := email.Send(s.smtpClient)
+	smtpClient, err := s.smtpServer.Connect()
+	if err != nil {
+		log.Fatalf("Could not connect to mail server '%s'. Reason: %s\n", s.smtpServer.Host, err.Error())
+	}
+
+	err = email.Send(smtpClient)
 	if err != nil {
 		log.Printf("Could not send mail to '%s'. Reason: %s\n", address, err.Error())
 	} else {
