@@ -8,10 +8,13 @@ clean:
 dependencies:
 	GO111MODULE=on go mod download
 
-build: dependencies build-server
+pkg-blobs:
+	pkger -o internal/gan
 
 build-server:
-	CGO_ENABLED=0 GO111MODULE=on go build -o ${BIN_DIR}/gan-server cmd/gan-server/main.go
+	CGO_ENABLED=1 GO111MODULE=on go build -o ${BIN_DIR}/gan-server cmd/gan-server/main.go
+
+build: dependencies build-server
 
 ci: clean dependencies test
 

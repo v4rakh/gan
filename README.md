@@ -13,7 +13,7 @@ There's also a [g.an frontend](https://github.com/v4rakh/gan-frontend).
 
 ## Install
 
-1. Run `make dependencies` to fetch dependencies
+1. Run `make clean dependencies` to fetch dependencies
 2. Start `github.com/v4rakh/gan/cmd/gan-server` as Go application and ensure to have _required_ environment variables
    set
 
@@ -42,6 +42,11 @@ The following environment variables can be used to modify application behavior.
 |MAIL_AUTH_PASSWORD|SMTP Setting|required if MAIL_ENABLED=true||
 |MAIL_AUTH_TYPE|SMTP Setting|required if MAIL_ENABLED=true|`PLAIN` [PLAIN,LOGIN,CRAM_MD5]|
 
+## Development
+
+When language files under `lang/` changes, execute `make pkg-blobs` to generate a new blob bundle which
+will be embedded into the Go binary.
+
 ## Release & deployment
 
 ### Native
@@ -55,12 +60,14 @@ To build docker images, do the following
 ```sh
 export IMG_NAME="gan-server";
 export IMG_TAG="latest";
-sudo docker build --no-cache -t ${IMG_NAME}:${IMG_TAG} .
+sudo docker build --rm --no-cache -t ${IMG_NAME}:${IMG_TAG} .
 
 # and/or
 
+export IMG_NAME="gan-server";
+export IMG_TAG="latest";
 export REMOTE_REPO_URL="varakh";
-sudo docker build --no-cache -t ${REMOTE_REPO_URL}/${IMG_NAME}:${IMG_TAG} .
+sudo docker build --rm --no-cache -t ${REMOTE_REPO_URL}/${IMG_NAME}:${IMG_TAG} .
 sudo docker push ${REMOTE_REPO_URL}/${IMG_NAME}:${IMG_TAG}
 ```
 
