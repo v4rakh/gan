@@ -55,6 +55,26 @@ Run `make clean build` and the binary will be placed into the `bin/` folder.
 
 ### Docker
 
+#### Run
+
+Default docker user is `appuser` (`uid=1000`) and group is `appuser` (`gid=1000`).
+
+Ensure that host bound `DB_FILE` will have the correct read and write permissions for this user.
+
+An example how to run with a persistent database file located on host system in `/my/host/data/folder/app.db`:
+
+```sh
+sudo docker run -p 8080:8080 \
+    -v /my/host/data/folder:/data
+    -e DB_FILE=/data/app.db \
+    -e ADMIN_USER=admin \
+    -e ADMIN_PASSWORD=changeit \
+    -e MAIL_ENABLED=false \
+    varakh/gan-server:latest
+```
+
+#### Build
+
 To build docker images, do the following
 
 ```sh
@@ -70,15 +90,3 @@ export REMOTE_REPO_URL="varakh";
 sudo docker build --rm --no-cache -t ${REMOTE_REPO_URL}/${IMG_NAME}:${IMG_TAG} .
 sudo docker push ${REMOTE_REPO_URL}/${IMG_NAME}:${IMG_TAG}
 ```
-
-An example how to run with a persistent database file located on host system in `/my/host/data/folder/app.db`:
-
-```sh
-sudo docker run -p 8080:8080 \
-    -v /my/host/data/folder:/data
-    -e DB_FILE=/data/app.db \
-    -e ADMIN_USER=admin \
-    -e ADMIN_PASSWORD=changeit \
-    -e MAIL_ENABLED=false \
-    varakh/gan-server:latest
-```  
