@@ -37,8 +37,7 @@ func configEnv() *env {
 	}
 
 	env := &env{db: db}
-	err = env.db.AutoMigrate(&announcement.Announcement{})
-	err = env.db.AutoMigrate(&subscription.Subscription{})
+	err = env.db.AutoMigrate(&announcement.Announcement{}, &subscription.Subscription{})
 	if err != nil {
 		log.Fatalf("Could not migrate database schema: %v\n", err)
 	}

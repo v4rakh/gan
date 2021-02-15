@@ -2,8 +2,8 @@ package constant
 
 const (
 	// general
-	AppName    = "gan"
-	AppVersion = "1.0.0-SNAPSHOT"
+	AppName    = "gan-server"
+	AppVersion = "1.0.0"
 
 	// http
 	AppNameHeader    = "X-App-Name"

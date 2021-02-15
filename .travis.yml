@@ -11,6 +11,6 @@ script:
   - make ci
 
 after_success:
-  - test $TRAVIS_BRANCH = "master" && docker build --no-cache -t v4rakh/gan-server:latest .
+  - test $TRAVIS_BRANCH = "master" && docker build --rm --no-cache -t varakh/gan-server:latest .
   - test $TRAVIS_BRANCH = "master" && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
-  - test $TRAVIS_BRANCH = "master" && docker push v4rakh/gan-server:latest
+  - test $TRAVIS_BRANCH = "master" && docker push varakh/gan-server:latest
