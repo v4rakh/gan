@@ -65,6 +65,7 @@ An example how to run with a persistent database file located on host system in 
 
 ```sh
 sudo docker run -p 8080:8080 \
+    --name gan \
     -v /my/host/data/folder:/data
     -e DB_FILE=/data/app.db \
     -e ADMIN_USER=admin \
