@@ -11,6 +11,8 @@ Features:
 
 There's also a [g.an frontend](https://github.com/v4rakh/gan-frontend).
 
+Image is available on [Docker Hub](https://hub.docker.com/r/varakh/gan-server).
+
 ## Install
 
 1. Run `make clean dependencies` to fetch dependencies
