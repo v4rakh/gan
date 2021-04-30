@@ -5,10 +5,14 @@ go:
 
 services:
   - docker
+  
+before_install:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
 
 script:
   - make clean build
   - make ci
-  - test $TRAVIS_BRANCH = "master" && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  
+after_success:
   - test $TRAVIS_BRANCH = "master" && docker build --rm --no-cache -t varakh/gan-server:latest .
   - test $TRAVIS_BRANCH = "master" && docker push varakh/gan-server:latest
