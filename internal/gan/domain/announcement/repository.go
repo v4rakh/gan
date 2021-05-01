@@ -9,22 +9,26 @@ type repository interface {
 	Paginate(page int, pageSize int, orderBy string, order string) ([]*Announcement, error)
 	Count() (int64, error)
 	Find(id string) (*Announcement, error)
-	Create(title string, content string) (Announcement, error)
+	Create(title string, content string) (*Announcement, error)
 	Update(id string, title string, content string) (*Announcement, error)
 	Delete(id string) error
 }
 
-type sqliteRepo struct {
+type repo struct {
 	db *gorm.DB
 }
 
-func NewRepo(db *gorm.DB) *sqliteRepo {
-	return &sqliteRepo{
+func NewRepo(db *gorm.DB) *repo {
+	return &repo{
 		db: db,
 	}
 }
 
-func (r *sqliteRepo) Find(id string) (*Announcement, error) {
+func (r *repo) Find(id string) (*Announcement, error) {
+	if id == "" {
+		return nil, domain.ErrorValidationNotBlank
+	}
+
 	var announcement Announcement
 
 	res := r.db.Find(&announcement, "id = ?", id)
@@ -40,9 +44,14 @@ func (r *sqliteRepo) Find(id string) (*Announcement, error) {
 	return &announcement, nil
 }
 
-func (r *sqliteRepo) Create(title string, content string) (Announcement, error) {
-	var e Announcement
-	e = Announcement{
+func (r *repo) Create(title string, content string) (*Announcement, error) {
+	if title == "" || content == "" {
+		return nil, domain.ErrorValidationNotBlank
+	}
+
+	var e *Announcement
+
+	e = &Announcement{
 		Base:    domain.Base{},
 		Title:   title,
 		Content: content,
@@ -51,17 +60,21 @@ func (r *sqliteRepo) Create(title string, content string) (Announcement, error) 
 	res := r.db.Create(&e)
 
 	if res.Error != nil {
-		return e, res.Error
+		return nil, res.Error
 	}
 
 	if res.RowsAffected == 0 {
-		return e, domain.ErrorCreateFailed
+		return nil, domain.ErrorCreateFailed
 	}
 
 	return e, nil
 }
 
-func (r *sqliteRepo) Update(id string, title string, content string) (*Announcement, error) {
+func (r *repo) Update(id string, title string, content string) (*Announcement, error) {
+	if id == "" || title == "" || content == "" {
+		return nil, domain.ErrorValidationNotBlank
+	}
+
 	e, err := r.Find(id)
 
 	if err != nil {
@@ -80,7 +93,11 @@ func (r *sqliteRepo) Update(id string, title string, content string) (*Announcem
 	return e, nil
 }
 
-func (r *sqliteRepo) Delete(id string) error {
+func (r *repo) Delete(id string) error {
+	if id == "" {
+		return domain.ErrorValidationNotBlank
+	}
+
 	res := r.db.Delete(&Announcement{}, "id = ?", id)
 
 	if res.Error != nil {
@@ -94,15 +111,15 @@ func (r *sqliteRepo) Delete(id string) error {
 	return nil
 }
 
-func (r *sqliteRepo) Paginate(page int, pageSize int, orderBy string, order string) ([]*Announcement, error) {
+func (r *repo) Paginate(page int, pageSize int, orderBy string, order string) ([]*Announcement, error) {
 	var e []*Announcement
 
 	if page == 0 || pageSize <= 0 {
-		return nil, domain.ErrorPageGreaterZero
+		return nil, domain.ErrorValidationPageGreaterZero
 	}
 
 	if pageSize <= 0 {
-		return nil, domain.ErrorPageSizeGreaterZero
+		return nil, domain.ErrorValidationPageSizeGreaterZero
 	}
 
 	offset := (page - 1) * pageSize
@@ -121,7 +138,7 @@ func (r *sqliteRepo) Paginate(page int, pageSize int, orderBy string, order stri
 	return e, nil
 }
 
-func (r *sqliteRepo) Count() (int64, error) {
+func (r *repo) Count() (int64, error) {
 	var c int64
 
 	var res *gorm.DB

@@ -9,7 +9,7 @@ import (
 
 func HandleAbortWhenError(c *gin.Context, err error) {
 	if err != nil {
-		if err == domain.ErrorPageGreaterZero || err == domain.ErrorPageSizeGreaterZero {
+		if err == domain.ErrorValidationNotBlank || err == domain.ErrorValidationPageGreaterZero || err == domain.ErrorValidationPageSizeGreaterZero {
 			c.AbortWithStatusJSON(http.StatusBadRequest, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorBadRequest, err.Error()))
 			return
 		} else if err == domain.ErrorForbiddenTokenMatch {

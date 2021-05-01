@@ -10,5 +10,6 @@ var ErrorUpdateFailed = errors.New("update failed")
 var ErrorForbiddenTokenMatch = errors.New("token doesn't match")
 var ErrorConflict = errors.New("already existing")
 
-var ErrorPageGreaterZero = errors.New("page has to be greater 0")
-var ErrorPageSizeGreaterZero = errors.New("pageSize has to be greater 0")
+var ErrorValidationNotBlank = errors.New("blank values are not allowed")
+var ErrorValidationPageGreaterZero = errors.New("page has to be greater 0")
+var ErrorValidationPageSizeGreaterZero = errors.New("pageSize has to be greater 0")

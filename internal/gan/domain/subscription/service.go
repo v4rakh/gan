@@ -28,6 +28,10 @@ func NewService(r repository, m *mail.Service, i *i18n.Service) *Service {
 }
 
 func (s *Service) Get(address string) (*Subscription, error) {
+	if address == "" {
+		return nil, domain.ErrorValidationNotBlank
+	}
+
 	e, err := s.repo.Find(address)
 
 	if err != nil {
@@ -38,6 +42,10 @@ func (s *Service) Get(address string) (*Subscription, error) {
 }
 
 func (s *Service) Rescue(address string) error {
+	if address == "" {
+		return domain.ErrorValidationNotBlank
+	}
+
 	e, err := s.Get(address)
 
 	if err != nil {
@@ -63,6 +71,10 @@ func (s *Service) Rescue(address string) error {
 }
 
 func (s *Service) Create(address string) error {
+	if address == "" {
+		return domain.ErrorValidationNotBlank
+	}
+
 	e, err := s.Get(address)
 
 	if e != nil {
@@ -70,7 +82,7 @@ func (s *Service) Create(address string) error {
 	}
 
 	token := util.RandomString(randomTokenLength)
-	_, err = s.repo.Create(address, Pending, token)
+	err = s.repo.Create(address, Pending, token)
 	s.mailService.Send(address, s.i18nService.Translate("mail_subscription_created_subject", nil), s.i18nService.Translate("mail_subscription_created_body", map[string]interface{}{
 		"Domain":  os.Getenv(constant.EnvDomain),
 		"Address": url.QueryEscape(address),
@@ -80,6 +92,10 @@ func (s *Service) Create(address string) error {
 }
 
 func (s *Service) Verify(address string, token string) error {
+	if address == "" || token == "" {
+		return domain.ErrorValidationNotBlank
+	}
+
 	e, err := s.Get(address)
 
 	if err != nil {
@@ -109,6 +125,10 @@ func (s *Service) Verify(address string, token string) error {
 }
 
 func (s *Service) Delete(address string, token string) error {
+	if address == "" || token == "" {
+		return domain.ErrorValidationNotBlank
+	}
+
 	e, err := s.Get(address)
 
 	if err != nil {
@@ -133,6 +153,10 @@ func (s *Service) Delete(address string, token string) error {
 }
 
 func (s *Service) NotifySubscribers(title string) {
+	if title == "" {
+		return
+	}
+
 	e, err := s.repo.ListWhereState(Active)
 
 	if err != nil {
@@ -148,6 +172,10 @@ func (s *Service) NotifySubscribers(title string) {
 }
 
 func (s *Service) DeleteByAddress(address string) error {
+	if address == "" {
+		return domain.ErrorValidationNotBlank
+	}
+
 	_, err := s.Get(address)
 
 	if err != nil {
