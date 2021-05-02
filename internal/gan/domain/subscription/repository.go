@@ -1,7 +1,7 @@
 package subscription
 
 import (
-	"github.com/v4rakh/gan/internal/gan/domain"
+	"github.com/v4rakh/gan/internal/errors"
 	"gorm.io/gorm"
 )
 
@@ -26,16 +26,19 @@ func NewRepo(db *gorm.DB) *repo {
 }
 
 func (r *repo) Find(address string) (*Subscription, error) {
-	var sub Subscription
+	if address == "" {
+		return nil, errors.ErrorValidationNotBlank
+	}
 
+	var sub Subscription
 	res := r.db.Find(&sub, "address = ?", address)
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return nil, domain.ErrorNotFound
+		return nil, errors.ErrorSubscriptionNotFound
 	}
 
 	return &sub, nil
@@ -43,7 +46,7 @@ func (r *repo) Find(address string) (*Subscription, error) {
 
 func (r *repo) Create(address string, state State, token string) error {
 	if address == "" || token == "" {
-		return domain.ErrorValidationNotBlank
+		return errors.ErrorValidationNotBlank
 	}
 
 	var e *Subscription
@@ -57,11 +60,11 @@ func (r *repo) Create(address string, state State, token string) error {
 	res := r.db.Create(&e)
 
 	if res.Error != nil {
-		return res.Error
+		return errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return domain.ErrorCreateFailed
+		return errors.ErrorSubscriptionCreateFailed
 	}
 
 	return nil
@@ -69,11 +72,10 @@ func (r *repo) Create(address string, state State, token string) error {
 
 func (r *repo) Update(address string, state State, token string) (*Subscription, error) {
 	if address == "" || token == "" {
-		return nil, domain.ErrorValidationNotBlank
+		return nil, errors.ErrorValidationNotBlank
 	}
 
 	e, err := r.Find(address)
-
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +86,7 @@ func (r *repo) Update(address string, state State, token string) (*Subscription,
 	res := r.db.Save(&e)
 
 	if res.RowsAffected == 0 {
-		return e, domain.ErrorUpdateFailed
+		return e, errors.ErrorSubscriptionUpdateFailed
 	}
 
 	return e, nil
@@ -92,17 +94,21 @@ func (r *repo) Update(address string, state State, token string) (*Subscription,
 
 func (r *repo) Delete(address string) error {
 	if address == "" {
-		return domain.ErrorValidationNotBlank
+		return errors.ErrorValidationNotBlank
+	}
+
+	_, err := r.Find(address)
+	if err != nil {
+		return err
 	}
 
 	res := r.db.Delete(&Subscription{}, "address = ?", address)
-
 	if res.Error != nil {
-		return res.Error
+		return errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return domain.ErrorDeleteFailed
+		return errors.ErrorSubscriptionDeleteFailed
 	}
 
 	return nil
@@ -112,11 +118,11 @@ func (r *repo) Paginate(page int, pageSize int, orderBy string, order string) ([
 	var e []*Subscription
 
 	if page == 0 || pageSize <= 0 {
-		return nil, domain.ErrorValidationPageGreaterZero
+		return nil, errors.ErrorValidationPageGreaterZero
 	}
 
 	if pageSize <= 0 {
-		return nil, domain.ErrorValidationPageSizeGreaterZero
+		return nil, errors.ErrorValidationPageSizeGreaterZero
 	}
 
 	offset := (page - 1) * pageSize
@@ -129,7 +135,7 @@ func (r *repo) Paginate(page int, pageSize int, orderBy string, order string) ([
 	}
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return e, nil
@@ -142,7 +148,7 @@ func (r *repo) ListWhereState(state State) ([]*Subscription, error) {
 	res = r.db.Where("state = ?", state.Value()).Find(&e)
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return e, nil
@@ -155,7 +161,7 @@ func (r *repo) Count() (int64, error) {
 	res = r.db.Model(&Subscription{}).Count(&c)
 
 	if res.Error != nil {
-		return 0, res.Error
+		return 0, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return c, nil

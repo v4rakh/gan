@@ -14,7 +14,7 @@ func ConvertErrorsTo(val *validator.ValidationErrors) *presenter.ErrorResponse {
 		errorMap[key] = txt
 	}
 
-	return presenter.NewErrorResponseWithStatusAndMessageAndData(presenter.ErrorBadRequest, util.ValuesString(errorMap), errorMap)
+	return presenter.NewErrorResponseWithStatusAndMessageAndData(presenter.ErrorIllegalArgument, util.ValuesString(errorMap), errorMap)
 }
 
 func validatorErrorToText(e *validator.FieldError) (string, string) {

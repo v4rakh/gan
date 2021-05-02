@@ -2,28 +2,39 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/v4rakh/gan/internal/errors"
 	"github.com/v4rakh/gan/internal/gan/api/presenter"
-	"github.com/v4rakh/gan/internal/gan/domain"
 	"net/http"
 )
 
 func HandleAbortWhenError(c *gin.Context, err error) {
-	if err != nil {
-		if err == domain.ErrorValidationNotBlank || err == domain.ErrorValidationPageGreaterZero || err == domain.ErrorValidationPageSizeGreaterZero {
-			c.AbortWithStatusJSON(http.StatusBadRequest, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorBadRequest, err.Error()))
+	if c == nil || err == nil {
+		return
+	}
+
+	switch e := err.(type) {
+	case *errors.ServiceError:
+		if e.Status == errors.IllegalArgument {
+			c.AbortWithStatusJSON(http.StatusBadRequest, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorIllegalArgument, e.Error()))
 			return
-		} else if err == domain.ErrorForbiddenTokenMatch {
-			c.AbortWithStatusJSON(http.StatusForbidden, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorForbidden, err.Error()))
+		} else if e.Status == errors.Unauthorized {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorUnauthorized, e.Error()))
 			return
-		} else if err == domain.ErrorNotFound {
-			c.AbortWithStatusJSON(http.StatusNotFound, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorNotFound, err.Error()))
+		} else if e.Status == errors.Forbidden {
+			c.AbortWithStatusJSON(http.StatusForbidden, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorForbidden, e.Error()))
 			return
-		} else if err == domain.ErrorConflict {
-			c.AbortWithStatusJSON(http.StatusConflict, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorConflict, err.Error()))
+		} else if e.Status == errors.NotFound {
+			c.AbortWithStatusJSON(http.StatusNotFound, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorNotFound, e.Error()))
 			return
-		} else {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
+		} else if e.Status == errors.Conflict {
+			c.AbortWithStatusJSON(http.StatusConflict, presenter.NewErrorResponseWithStatusAndMessage(presenter.ErrorConflict, e.Error()))
+			return
+		} else if e.Status == errors.GeneralError {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(e.Error()))
 			return
 		}
+	default:
+		c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(err.Error()))
+		return
 	}
 }

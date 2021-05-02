@@ -1,6 +1,7 @@
 package announcement
 
 import (
+	"github.com/v4rakh/gan/internal/errors"
 	"github.com/v4rakh/gan/internal/gan/domain"
 	"gorm.io/gorm"
 )
@@ -26,7 +27,7 @@ func NewRepo(db *gorm.DB) *repo {
 
 func (r *repo) Find(id string) (*Announcement, error) {
 	if id == "" {
-		return nil, domain.ErrorValidationNotBlank
+		return nil, errors.ErrorValidationNotBlank
 	}
 
 	var announcement Announcement
@@ -34,11 +35,11 @@ func (r *repo) Find(id string) (*Announcement, error) {
 	res := r.db.Find(&announcement, "id = ?", id)
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return nil, domain.ErrorNotFound
+		return nil, errors.ErrorAnnouncementNotFound
 	}
 
 	return &announcement, nil
@@ -46,7 +47,7 @@ func (r *repo) Find(id string) (*Announcement, error) {
 
 func (r *repo) Create(title string, content string) (*Announcement, error) {
 	if title == "" || content == "" {
-		return nil, domain.ErrorValidationNotBlank
+		return nil, errors.ErrorValidationNotBlank
 	}
 
 	var e *Announcement
@@ -60,11 +61,11 @@ func (r *repo) Create(title string, content string) (*Announcement, error) {
 	res := r.db.Create(&e)
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return nil, domain.ErrorCreateFailed
+		return nil, errors.ErrorAnnouncementCreateFailed
 	}
 
 	return e, nil
@@ -72,11 +73,10 @@ func (r *repo) Create(title string, content string) (*Announcement, error) {
 
 func (r *repo) Update(id string, title string, content string) (*Announcement, error) {
 	if id == "" || title == "" || content == "" {
-		return nil, domain.ErrorValidationNotBlank
+		return nil, errors.ErrorValidationNotBlank
 	}
 
 	e, err := r.Find(id)
-
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (r *repo) Update(id string, title string, content string) (*Announcement, e
 	res := r.db.Save(&e)
 
 	if res.RowsAffected == 0 {
-		return e, domain.ErrorUpdateFailed
+		return e, errors.ErrorAnnouncementUpdateFailed
 	}
 
 	return e, nil
@@ -95,17 +95,22 @@ func (r *repo) Update(id string, title string, content string) (*Announcement, e
 
 func (r *repo) Delete(id string) error {
 	if id == "" {
-		return domain.ErrorValidationNotBlank
+		return errors.ErrorValidationNotBlank
+	}
+
+	_, err := r.Find(id)
+	if err != nil {
+		return err
 	}
 
 	res := r.db.Delete(&Announcement{}, "id = ?", id)
 
 	if res.Error != nil {
-		return res.Error
+		return errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return domain.ErrorDeleteFailed
+		return errors.ErrorAnnouncementDeleteFailed
 	}
 
 	return nil
@@ -115,11 +120,11 @@ func (r *repo) Paginate(page int, pageSize int, orderBy string, order string) ([
 	var e []*Announcement
 
 	if page == 0 || pageSize <= 0 {
-		return nil, domain.ErrorValidationPageGreaterZero
+		return nil, errors.ErrorValidationPageGreaterZero
 	}
 
 	if pageSize <= 0 {
-		return nil, domain.ErrorValidationPageSizeGreaterZero
+		return nil, errors.ErrorValidationPageSizeGreaterZero
 	}
 
 	offset := (page - 1) * pageSize
@@ -132,7 +137,7 @@ func (r *repo) Paginate(page int, pageSize int, orderBy string, order string) ([
 	}
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return e, nil
@@ -145,7 +150,7 @@ func (r *repo) Count() (int64, error) {
 	res = r.db.Model(&Announcement{}).Count(&c)
 
 	if res.Error != nil {
-		return 0, res.Error
+		return 0, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return c, nil

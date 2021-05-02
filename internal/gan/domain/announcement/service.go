@@ -1,7 +1,7 @@
 package announcement
 
 import (
-	"github.com/v4rakh/gan/internal/gan/domain"
+	"github.com/v4rakh/gan/internal/errors"
 	"github.com/v4rakh/gan/internal/gan/domain/subscription"
 )
 
@@ -19,7 +19,7 @@ func NewService(r repository, s *subscription.Service) *Service {
 
 func (s *Service) Get(id string) (*Announcement, error) {
 	if id == "" {
-		return nil, domain.ErrorValidationNotBlank
+		return nil, errors.ErrorValidationNotBlank
 	}
 
 	e, err := s.repo.Find(id)
@@ -28,12 +28,16 @@ func (s *Service) Get(id string) (*Announcement, error) {
 		return nil, err
 	}
 
+	if e == nil {
+		return nil, errors.ErrorAnnouncementNotFound
+	}
+
 	return e, nil
 }
 
 func (s *Service) Create(title string, content string) (*Announcement, error) {
 	if title == "" || content == "" {
-		return nil, domain.ErrorValidationNotBlank
+		return nil, errors.ErrorValidationNotBlank
 	}
 
 	e, err := s.repo.Create(title, content)
@@ -47,7 +51,7 @@ func (s *Service) Create(title string, content string) (*Announcement, error) {
 
 func (s *Service) Update(id string, title string, content string) (*Announcement, error) {
 	if id == "" {
-		return nil, domain.ErrorValidationNotBlank
+		return nil, errors.ErrorValidationNotBlank
 	}
 
 	_, err := s.Get(id)
@@ -61,7 +65,7 @@ func (s *Service) Update(id string, title string, content string) (*Announcement
 
 func (s *Service) Delete(id string) error {
 	if id == "" {
-		return domain.ErrorValidationNotBlank
+		return errors.ErrorValidationNotBlank
 	}
 
 	_, err := s.Get(id)

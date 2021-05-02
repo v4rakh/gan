@@ -1,11 +1,12 @@
 package presenter
 
 const (
-	ErrorBadRequest = "BadRequest"
-	ErrorNotFound   = "NotFound"
-	ErrorForbidden  = "Forbidden"
-	ErrorConflict   = "Conflict"
-	ErrorGeneral    = "GeneralError"
+	ErrorIllegalArgument = "IllegalArgument"
+	ErrorUnauthorized    = "Unauthorized"
+	ErrorForbidden       = "Forbidden"
+	ErrorNotFound        = "NotFound"
+	ErrorConflict        = "Conflict"
+	ErrorGeneral         = "GeneralError"
 )
 
 type Response struct {

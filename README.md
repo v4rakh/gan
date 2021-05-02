@@ -46,8 +46,8 @@ The following environment variables can be used to modify application behavior.
 
 ## Development
 
-When language files under `lang/` changes, execute `make pkg-blobs` to generate a new blob bundle which
-will be embedded into the Go binary.
+When language files under `lang/` changes, execute `make pkg-blobs` to generate a new blob bundle which will be embedded
+into the Go binary.
 
 ## Release & deployment
 
