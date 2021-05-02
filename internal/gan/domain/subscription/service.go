@@ -1,8 +1,8 @@
 package subscription
 
 import (
+	"github.com/v4rakh/gan/internal/errors"
 	"github.com/v4rakh/gan/internal/gan/constant"
-	"github.com/v4rakh/gan/internal/gan/domain"
 	"github.com/v4rakh/gan/internal/gan/service/i18n"
 	"github.com/v4rakh/gan/internal/gan/service/mail"
 	"github.com/v4rakh/gan/internal/util"
@@ -28,6 +28,10 @@ func NewService(r repository, m *mail.Service, i *i18n.Service) *Service {
 }
 
 func (s *Service) Get(address string) (*Subscription, error) {
+	if address == "" {
+		return nil, errors.ErrorValidationNotBlank
+	}
+
 	e, err := s.repo.Find(address)
 
 	if err != nil {
@@ -38,8 +42,11 @@ func (s *Service) Get(address string) (*Subscription, error) {
 }
 
 func (s *Service) Rescue(address string) error {
-	e, err := s.Get(address)
+	if address == "" {
+		return errors.ErrorValidationNotBlank
+	}
 
+	e, err := s.Get(address)
 	if err != nil {
 		return err
 	}
@@ -63,14 +70,17 @@ func (s *Service) Rescue(address string) error {
 }
 
 func (s *Service) Create(address string) error {
-	e, err := s.Get(address)
+	if address == "" {
+		return errors.ErrorValidationNotBlank
+	}
 
+	e, err := s.Get(address)
 	if e != nil {
-		return domain.ErrorConflict
+		return errors.ErrorSubscriptionAlreadyActive
 	}
 
 	token := util.RandomString(randomTokenLength)
-	_, err = s.repo.Create(address, Pending, token)
+	err = s.repo.Create(address, Pending, token)
 	s.mailService.Send(address, s.i18nService.Translate("mail_subscription_created_subject", nil), s.i18nService.Translate("mail_subscription_created_body", map[string]interface{}{
 		"Domain":  os.Getenv(constant.EnvDomain),
 		"Address": url.QueryEscape(address),
@@ -80,18 +90,21 @@ func (s *Service) Create(address string) error {
 }
 
 func (s *Service) Verify(address string, token string) error {
-	e, err := s.Get(address)
+	if address == "" || token == "" {
+		return errors.ErrorValidationNotBlank
+	}
 
+	e, err := s.Get(address)
 	if err != nil {
 		return err
 	}
 
 	if e.Token != token {
-		return domain.ErrorForbiddenTokenMatch
+		return errors.ErrorSubscriptionForbiddenTokenMatch
 	}
 
 	if State(e.State) == Active {
-		return domain.ErrorConflict
+		return errors.ErrorSubscriptionAlreadyActive
 	}
 
 	newToken := util.RandomString(randomTokenLength)
@@ -109,18 +122,20 @@ func (s *Service) Verify(address string, token string) error {
 }
 
 func (s *Service) Delete(address string, token string) error {
-	e, err := s.Get(address)
+	if address == "" || token == "" {
+		return errors.ErrorValidationNotBlank
+	}
 
+	e, err := s.Get(address)
 	if err != nil {
 		return err
 	}
 
 	if e.Token != token {
-		return domain.ErrorForbiddenTokenMatch
+		return errors.ErrorSubscriptionForbiddenTokenMatch
 	}
 
-	err = s.repo.Delete(address)
-
+	err = s.repo.Delete(e.Address)
 	if err != nil {
 		return err
 	}
@@ -133,10 +148,19 @@ func (s *Service) Delete(address string, token string) error {
 }
 
 func (s *Service) NotifySubscribers(title string) {
-	e, err := s.repo.ListWhereState(Active)
+	if title == "" {
+		return
+	}
 
+	e, err := s.repo.ListWhereState(Active)
 	if err != nil {
 		log.Printf("Could not retrieve subscriptions. Reason: %s\n", err.Error())
+		return
+	}
+
+	if len(e) == 0 {
+		log.Print("No active subscriptions found, skipping notifications")
+		return
 	}
 
 	for _, sub := range e {
@@ -148,8 +172,11 @@ func (s *Service) NotifySubscribers(title string) {
 }
 
 func (s *Service) DeleteByAddress(address string) error {
-	_, err := s.Get(address)
+	if address == "" {
+		return errors.ErrorValidationNotBlank
+	}
 
+	_, err := s.Get(address)
 	if err != nil {
 		return err
 	}

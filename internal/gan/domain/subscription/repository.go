@@ -1,7 +1,7 @@
 package subscription
 
 import (
-	"github.com/v4rakh/gan/internal/gan/domain"
+	"github.com/v4rakh/gan/internal/errors"
 	"gorm.io/gorm"
 )
 
@@ -10,40 +10,48 @@ type repository interface {
 	ListWhereState(state State) ([]*Subscription, error)
 	Count() (int64, error)
 	Find(address string) (*Subscription, error)
-	Create(address string, state State, token string) (Subscription, error)
+	Create(address string, state State, token string) error
 	Update(address string, state State, token string) (*Subscription, error)
 	Delete(address string) error
 }
 
-type sqliteRepo struct {
+type repo struct {
 	db *gorm.DB
 }
 
-func NewRepo(db *gorm.DB) *sqliteRepo {
-	return &sqliteRepo{
+func NewRepo(db *gorm.DB) *repo {
+	return &repo{
 		db: db,
 	}
 }
 
-func (r *sqliteRepo) Find(address string) (*Subscription, error) {
-	var sub Subscription
+func (r *repo) Find(address string) (*Subscription, error) {
+	if address == "" {
+		return nil, errors.ErrorValidationNotBlank
+	}
 
+	var sub Subscription
 	res := r.db.Find(&sub, "address = ?", address)
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return nil, domain.ErrorNotFound
+		return nil, errors.ErrorSubscriptionNotFound
 	}
 
 	return &sub, nil
 }
 
-func (r *sqliteRepo) Create(address string, state State, token string) (Subscription, error) {
-	var e Subscription
-	e = Subscription{
+func (r *repo) Create(address string, state State, token string) error {
+	if address == "" || token == "" {
+		return errors.ErrorValidationNotBlank
+	}
+
+	var e *Subscription
+
+	e = &Subscription{
 		Address: address,
 		State:   state.Value(),
 		Token:   token,
@@ -52,19 +60,22 @@ func (r *sqliteRepo) Create(address string, state State, token string) (Subscrip
 	res := r.db.Create(&e)
 
 	if res.Error != nil {
-		return e, res.Error
+		return errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return e, domain.ErrorCreateFailed
+		return errors.ErrorSubscriptionCreateFailed
 	}
 
-	return e, nil
+	return nil
 }
 
-func (r *sqliteRepo) Update(address string, state State, token string) (*Subscription, error) {
-	e, err := r.Find(address)
+func (r *repo) Update(address string, state State, token string) (*Subscription, error) {
+	if address == "" || token == "" {
+		return nil, errors.ErrorValidationNotBlank
+	}
 
+	e, err := r.Find(address)
 	if err != nil {
 		return nil, err
 	}
@@ -75,35 +86,43 @@ func (r *sqliteRepo) Update(address string, state State, token string) (*Subscri
 	res := r.db.Save(&e)
 
 	if res.RowsAffected == 0 {
-		return e, domain.ErrorUpdateFailed
+		return e, errors.ErrorSubscriptionUpdateFailed
 	}
 
 	return e, nil
 }
 
-func (r *sqliteRepo) Delete(address string) error {
-	res := r.db.Delete(&Subscription{}, "address = ?", address)
+func (r *repo) Delete(address string) error {
+	if address == "" {
+		return errors.ErrorValidationNotBlank
+	}
 
+	_, err := r.Find(address)
+	if err != nil {
+		return err
+	}
+
+	res := r.db.Delete(&Subscription{}, "address = ?", address)
 	if res.Error != nil {
-		return res.Error
+		return errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	if res.RowsAffected == 0 {
-		return domain.ErrorDeleteFailed
+		return errors.ErrorSubscriptionDeleteFailed
 	}
 
 	return nil
 }
 
-func (r *sqliteRepo) Paginate(page int, pageSize int, orderBy string, order string) ([]*Subscription, error) {
+func (r *repo) Paginate(page int, pageSize int, orderBy string, order string) ([]*Subscription, error) {
 	var e []*Subscription
 
 	if page == 0 || pageSize <= 0 {
-		return nil, domain.ErrorPageGreaterZero
+		return nil, errors.ErrorValidationPageGreaterZero
 	}
 
 	if pageSize <= 0 {
-		return nil, domain.ErrorPageSizeGreaterZero
+		return nil, errors.ErrorValidationPageSizeGreaterZero
 	}
 
 	offset := (page - 1) * pageSize
@@ -116,33 +135,33 @@ func (r *sqliteRepo) Paginate(page int, pageSize int, orderBy string, order stri
 	}
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return e, nil
 }
 
-func (r *sqliteRepo) ListWhereState(state State) ([]*Subscription, error) {
+func (r *repo) ListWhereState(state State) ([]*Subscription, error) {
 	var e []*Subscription
 	var res *gorm.DB
 
 	res = r.db.Where("state = ?", state.Value()).Find(&e)
 
 	if res.Error != nil {
-		return nil, res.Error
+		return nil, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return e, nil
 }
 
-func (r *sqliteRepo) Count() (int64, error) {
+func (r *repo) Count() (int64, error) {
 	var c int64
 
 	var res *gorm.DB
 	res = r.db.Model(&Subscription{}).Count(&c)
 
 	if res.Error != nil {
-		return 0, res.Error
+		return 0, errors.New(errors.GeneralError, res.Error.Error())
 	}
 
 	return c, nil

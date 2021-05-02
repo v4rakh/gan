@@ -37,6 +37,7 @@ func StartServer() {
 	router := gin.Default()
 	router.Use(middleware.AppName())
 	router.Use(middleware.AppVersion())
+	router.Use(middleware.AppErrorRecoveryHandler())
 
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{os.Getenv(constant.EnvCorsAllowOrigin)},
