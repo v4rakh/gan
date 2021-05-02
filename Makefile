@@ -1,6 +1,6 @@
 all: build
 
-BIN_DIR = $(PWD)/bin
+BIN_DIR = $(shell pwd)/bin
 
 clean:
 	rm -rf ${BIN_DIR}
