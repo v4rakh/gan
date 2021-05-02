@@ -25,7 +25,6 @@ func AppVersion() gin.HandlerFunc {
 func AppErrorRecoveryHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
-			c.Header(constant.AppVersionHeader, constant.AppVersion)
 			if err := recover(); err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, presenter.NewErrorResponseWithMessage(fmt.Sprintf("%s", err)))
 			}
