@@ -1,10 +1,10 @@
 {
-  "mail_subscription_created_subject": "Verify your subscription",
-  "mail_subscription_created_body": "Visit\n\n{{.Domain}}/subscriptions/verify?address={{.Address}}&token={{.Token}}\n\nto verify your subscription",
-  "mail_subscription_verified_subject": "Keep to delete subscription",
-  "mail_subscription_verified_body": "Please keep this mail to delete your subscription.\n\nIf you like to unsubscribe, visit\n\n{{.Domain}}/subscriptions/delete?address={{.Address}}&token={{.Token}}",
-  "mail_subscription_deleted_subject": "Subscription deleted",
-  "mail_subscription_deleted_body": "Your subscription on {{.Domain}} has been deleted",
-  "mail_new_announcement_subject": "New announcement",
-  "mail_new_announcement_body": "There's a new announcement on {{.Domain}}:\n\n{{.Title}}"
+    "mail_subscription_created_subject": "Verify your subscription",
+    "mail_subscription_created_body": "Visit\n\n{{.Domain}}/subscriptions/verify?address={{.Address}}&token={{.Token}}\n\nto verify your subscription",
+    "mail_subscription_verified_subject": "Keep to delete subscription",
+    "mail_subscription_verified_body": "Please keep this mail to delete your subscription.\n\nIf you like to unsubscribe, visit\n\n{{.Domain}}/subscriptions/delete?address={{.Address}}&token={{.Token}}",
+    "mail_subscription_deleted_subject": "Subscription deleted",
+    "mail_subscription_deleted_body": "Your subscription on {{.Domain}} has been deleted",
+    "mail_new_announcement_subject": "New announcement",
+    "mail_new_announcement_body": "There's a new announcement on {{.Domain}}:\n\n{{.Title}}"
 }

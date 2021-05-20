@@ -1,18 +1,18 @@
 sudo: required
 language: go
 go:
-  - "1.16"
+    - "1.16"
 
 services:
-  - docker
+    - docker
 
 before_install:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
 
 script:
-  - make clean build
-  - make ci
+    - make clean build
+    - make ci
 
 after_success:
-  - test $TRAVIS_BRANCH = "master" && docker build --rm --no-cache -t varakh/gan-server:latest .
-  - test $TRAVIS_BRANCH = "master" && docker push varakh/gan-server:latest
+    - test $TRAVIS_BRANCH = "master" && docker build --rm --no-cache -t varakh/gan-server:latest .
+    - test $TRAVIS_BRANCH = "master" && docker push varakh/gan-server:latest
